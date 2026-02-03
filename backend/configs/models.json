@@ -1,0 +1,16 @@
+{
+  "chat": {
+    "fast": "qwen2.5:14b",
+    "thinking": "qwen3:14b",
+    "default": "qwen3:1.7b"
+  },
+  "vibe_coding": {
+    "default": "qwen2.5-coder:7b"
+  },
+  "image": {
+    "default": "qwen2.5vl:7b"
+  },
+  "web": {
+    "default": "qwen2.5:7b"
+  }
+}

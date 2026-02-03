@@ -1,0 +1,942 @@
+/* Global reset-ish */
+* {
+    box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+    height: 100%;
+}
+
+body {
+    margin: 0;
+    background: var(--color-bg);
+    color: var(--color-text);
+    font-family: var(--font-family);
+    font-size: var(--font-size);
+}
+
+/* App grid: sidebar | chat */
+.app-grid {
+    display: grid;
+    grid-template-columns: var(--sidebar-w) 1fr;
+    gap: var(--gap);
+    height: 100vh;
+    padding: var(--gap);
+    min-height: 0;
+}
+
+    /* When there is NO sidebar (control group), let chat take full width */
+    .app-grid.no-sidebar {
+        grid-template-columns: 1fr;
+    }
+
+/* Sidebar */
+/* The final definition for .sidebar and .sidebar-inner comes much later
+   and completely overrides the original grid layout */
+.sidebar {
+    /* Final style: overrides earlier definition */
+    background: var(--color-sidebar-bg);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden;
+}
+
+.sidebar-inner {
+    /* Final style: overrides earlier definition */
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: flex-start; /* <– important: top, not center */
+    padding: var(--gap);
+}
+
+/* Cards (No redundancy in this block) */
+.card {
+    background: var(--color-panel);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    padding: var(--card-padding);
+    box-shadow: var(--shadow-sm);
+}
+
+.section-title {
+    margin: 0 0 10px 0;
+    font-weight: var(--font-weight-strong);
+    letter-spacing: 0.2px;
+}
+
+/* Energy & water figures (No redundancy in this block) */
+.energy-figure,
+.water-figure {
+    display: flex;
+    align-items: baseline;
+    gap: 8px;
+}
+
+.energy-value,
+.water-value {
+    font-size: 40px;
+    font-weight: var(--font-weight-strong);
+}
+
+.energy-unit,
+.water-unit {
+    color: var(--color-text-dim);
+}
+
+/* Meter (No redundancy in this block) */
+.meter {
+    display: grid;
+    gap: 8px;
+    margin-bottom: 12px;
+}
+
+    .meter:last-child {
+        margin-bottom: 0;
+    }
+
+.meter-head {
+    display: flex;
+    justify-content: space-between;
+    align-items: baseline;
+}
+
+.meter-label {
+    color: var(--color-text-dim);
+}
+
+.meter-value {
+    font-weight: var(--font-weight-strong);
+}
+
+.meter-track {
+    position: relative;
+    height: 14px;
+    border-radius: 999px;
+    background: linear-gradient(90deg, var(--meter-green), var(--meter-yellow), var(--meter-red));
+    overflow: hidden;
+    border: 1px solid var(--color-border);
+}
+
+.meter-fill {
+    position: absolute;
+    inset: 0 0 0 auto; /* we'll control width only */
+    background: rgba(0, 0, 0, 0.35);
+    width: 0%;
+    pointer-events: none;
+}
+
+    /* Optional: give a subtle indicator cap */
+    .meter-fill::after {
+        content: "";
+        position: absolute;
+        right: 0;
+        top: -4px;
+        width: 2px;
+        height: 22px;
+        background: #fff8;
+        border-radius: 2px;
+    }
+
+.meter-scale {
+    display: flex;
+    justify-content: space-between;
+    color: var(--color-text-dim);
+    font-size: 12px;
+}
+
+/* Chat pane (right) (No redundancy in this block) */
+.chat {
+    display: grid;
+    grid-template-rows: auto 1fr; /* top bar small, main area grows */
+    gap: var(--gap);
+    min-height: 0; /* allow children to shrink properly */
+}
+
+    .chat > * {
+        min-height: 0;
+    }
+
+.chat-main {
+    display: grid;
+    grid-template-rows: auto 1fr; /* StudyControls on top, chat area takes remaining space */
+    gap: var(--gap);
+    min-height: 0; /* allow the 1fr row to shrink properly */
+    overflow: hidden; /* keep scrolling inside the chat area */
+}
+
+.chat-scroll-container {
+    min-height: 0; /* important for nested scroll to work */
+    /* flex: 1 1 auto;  (this is fine to leave as-is; it's ignored in grid layout) */
+}
+
+/* Generic parent panel used for chat history + input (No redundancy in this block) */
+.panel {
+    background: var(--color-panel);
+    border: 1px solid var(--color-border);
+    border-radius: var(--radius);
+    box-shadow: var(--shadow-sm);
+    overflow: hidden; /* keeps rounded corners on internal scroll areas */
+}
+
+.panel-body {
+    padding: 12px; /* outer padding for the panel */
+}
+
+/* Chat history (inner content) (No redundancy in this block) */
+.chat-history {
+    height: 100%;
+    overflow-y: auto;
+    padding: 8px;
+    /* vertical list of messages, hugging content */
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* Each message row (No redundancy in this block) */
+.chat-bubble {
+    display: flex;
+    align-items: flex-start; /* don't stretch vertically */
+    /* no fixed height or flex: 1 here */
+}
+
+    /* Align left/right */
+    .chat-bubble.user {
+        justify-content: flex-end;
+    }
+
+    .chat-bubble.bot {
+        justify-content: flex-start;
+    }
+
+    /* The actual bubble that wraps the text */
+    .chat-bubble .bubble {
+        display: inline-block; /* key to hug content */
+        max-width: min(70ch, 80%);
+        padding: 10px 12px;
+        border-radius: 12px;
+        line-height: 1.35;
+        border: 1px solid var(--color-border);
+        box-shadow: var(--shadow-sm);
+        /* Handle code overflow */
+        overflow-x: auto;
+        word-wrap: break-word;
+        overflow-wrap: break-word;
+    }
+
+    .chat-bubble.user .bubble {
+        background: var(--bubble-user);
+    }
+
+    .chat-bubble.bot .bubble {
+        background: var(--bubble-bot);
+    }
+
+/* Code blocks inside chat bubbles - handle overflow */
+.chat-bubble .bubble pre,
+.chat-bubble .bubble .markdown-code-block {
+    max-width: 100%;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    word-break: break-word;
+    background: rgba(0, 0, 0, 0.05);
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 13px;
+    line-height: 1.4;
+    margin: 8px 0;
+}
+
+.chat-bubble .bubble code {
+    font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+    font-size: 0.9em;
+}
+
+/* Inline code (not in pre block) */
+.chat-bubble .bubble p code,
+.chat-bubble .bubble li code {
+    background: rgba(0, 0, 0, 0.06);
+    padding: 2px 5px;
+    border-radius: 4px;
+}
+
+/* Chat input (inner content) (No redundancy in this block) */
+.chat-input {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 10px;
+    /* let it grow with content instead of fixed height */
+    /* height: var(--chat-input-h); */ /* remove or comment out */
+    align-items: flex-end; /* bottom-align button with textarea */
+}
+
+.chat-text {
+    width: 100%;
+    /* auto height + min/max for ChatGPT-like behavior */
+    height: auto;
+    min-height: 40px;
+    max-height: 200px; /* adjust to taste */
+    padding: 8px 12px;
+    line-height: 1.4;
+    border-radius: 10px;
+    border: 1px solid var(--color-border);
+    background: var(--input-bg);
+    color: var(--input-text);
+    outline: none;
+    resize: none; /* user can't drag-resize, we control it */
+    overflow-y: auto; /* scroll when content exceeds max-height */
+}
+
+    .chat-text:focus {
+        border-color: var(--color-accent);
+    }
+
+.chat-send {
+    height: 100%;
+    padding: 0 18px;
+    border-radius: 10px;
+    border: 1px solid transparent;
+    background: var(--button-bg);
+    color: var(--button-text);
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: var(--shadow-md);
+}
+
+    .chat-send:hover {
+        filter: brightness(1.05);
+    }
+
+
+/* Responsive tweak: collapse sidebar at small widths (No redundancy in this block) */
+@media (max-width: 900px) {
+    .app-grid {
+        grid-template-columns: 1fr;
+        grid-auto-rows: auto;
+    }
+
+    .sidebar {
+        order: 2;
+    }
+
+    .chat {
+        order: 1;
+    }
+}
+
+/* Study controls — layout + spacing (No redundancy in this block) */
+.study-controls {
+    padding: 16px 18px; /* panel padding */
+    border-radius: 12px;
+    background: var(--color-bg, var(--color-bg));
+    /* add spacing below this block so it doesn't stick to the next section */
+    margin-bottom: 16px;
+}
+
+    /* Title that looks like a title */
+    .study-controls .panel-title {
+        font-size: 1.125rem;
+        font-weight: 700;
+        letter-spacing: .2px;
+        margin: 0 0 12px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--color-border);
+    }
+
+    /* Grid */
+    .study-controls .study-grid {
+        display: grid;
+        grid-template-columns: repeat(6, minmax(140px, 1fr));
+        gap: 14px 16px;
+        align-items: stretch; /* make all cells the same height */
+    }
+
+        /* Give every direct child of the grid the same “card” treatment */
+        .study-controls .study-grid > * {
+            padding: 10px 12px;
+            border: 1px solid var(--color-border);
+            border-radius: 10px;
+            background: var(--color-bg-elevated);
+            display: flex; /* normalize vertical alignment */
+            flex-direction: column;
+            justify-content: center; /* center content vertically */
+            min-height: 64px; /* keeps rows aligned */
+        }
+
+    /* Form fields */
+    .study-controls label {
+        gap: 6px;
+        font-weight: 600;
+    }
+
+    .study-controls input,
+    .study-controls select {
+        padding: 8px 10px;
+        border: 1px solid var(--color-border);
+        border-radius: 8px;
+        background: var(--color-bg);
+    }
+
+    .study-controls .timer {
+        /* override the generic card flex behavior */
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+        justify-content: flex-start;
+        gap: 8px;
+        min-height: auto; /* override the 64px so it can grow as needed */
+    }
+
+    .study-controls .btn-row {
+        display: flex;
+        flex-wrap: wrap; /* allow 3 buttons to wrap if needed */
+        gap: 8px;
+        margin-top: 0;
+    }
+
+        .study-controls .btn-row button {
+            flex: 1 1 0; /* share width nicely */
+            min-width: 0; /* don't force the card wider */
+            /*white-space: nowrap; /* keep labels on one line */
+        }
+
+    .study-controls button[disabled] {
+        opacity: .6;
+        cursor: not-allowed;
+    }
+
+    /* Metrics / export / session box */
+    .study-controls .metrics {
+        gap: 4px;
+    }
+
+    .study-controls .export {
+        align-items: flex-end; /* keeps Export button top-aligned but on the right inside its box */
+    }
+
+/* Responsive (No redundancy in this block) */
+@media (max-width: 1200px) {
+    .study-controls .study-grid {
+        grid-template-columns: repeat(3, 1fr);
+    }
+}
+
+@media (max-width: 900px) {
+    .study-controls .study-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+}
+
+@media (max-width: 560px) {
+    .study-controls .study-grid {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* EUI widget — container + title (No redundancy in this block) */
+.eui-widget {
+    padding: 16px 18px; /* panel padding */
+    border-radius: 12px;
+    background: var(--color-bg-soft, var(--color-bg));
+    display: grid; /* structure the inside */
+    grid-template-columns: repeat(3, minmax(180px, 1fr));
+    gap: 14px 16px;
+    align-items: stretch;
+}
+
+    .eui-widget .panel-title {
+        font-size: 1.125rem;
+        font-weight: 700;
+        letter-spacing: .2px;
+        margin: 0 0 8px;
+        padding-bottom: 8px;
+        border-bottom: 1px solid var(--color-border);
+        grid-column: 1 / -1; /* full width */
+    }
+
+    /* Cards for each metric row */
+    .eui-widget .eui-row {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin: 0; /* reset old margin */
+        padding: 10px 12px; /* card padding */
+        border: 1px solid var(--color-border);
+        border-radius: 10px;
+        background: var(--color-bg-elevated);
+        min-height: 64px; /* keeps rows aligned */
+    }
+
+    /* Column contents */
+    .eui-widget .eui-col {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .eui-widget .eui-label {
+        font-size: 12px;
+        opacity: 0.75;
+    }
+
+    .eui-widget .eui-value {
+        font-weight: 700;
+        font-variant-numeric: tabular-nums;
+    }
+
+    /* Status dot */
+    .eui-widget .traffic-dot {
+        width: 14px;
+        height: 14px;
+        border-radius: 50%;
+        box-shadow: 0 0 0 2px rgba(0, 0, 0, 0.06) inset;
+        flex: 0 0 14px; /* stable alignment */
+    }
+
+    .eui-widget.green .traffic-dot {
+        background: #2ecc71;
+    }
+
+    .eui-widget.amber .traffic-dot {
+        background: #f1c40f;
+    }
+
+    .eui-widget.red .traffic-dot {
+        background: #e74c3c;
+    }
+
+    /* Legend */
+    .eui-widget .eui-help {
+        grid-column: 1 / -1; /* full width bar */
+        margin-top: 2px;
+        padding: 10px 12px;
+        border: 1px dashed var(--color-border);
+        border-radius: 10px;
+        font-size: 12px;
+        opacity: 0.8;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        background: var(--color-bg-elevated);
+    }
+
+    .eui-widget .dot {
+        display: inline-block;
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        margin-right: 4px;
+    }
+
+        .eui-widget .dot.green {
+            background: #2ecc71;
+        }
+
+        .eui-widget .dot.amber {
+            background: #f1c40f;
+        }
+
+        .eui-widget .dot.red {
+            background: #e74c3c;
+        }
+
+/* Responsive for EUI widget (No redundancy in this block) */
+@media (max-width: 1100px) {
+    .eui-widget {
+        grid-template-columns: repeat(2, minmax(180px, 1fr));
+    }
+}
+
+@media (max-width: 560px) {
+    .eui-widget {
+        grid-template-columns: 1fr;
+    }
+}
+
+/* Specific EUI widget for sidebar (No redundancy in this block) */
+.eui-widget.sidebar {
+    grid-template-columns: 1fr;
+    background: var(--color-panel);
+    border: 1px solid var(--color-border);
+    box-shadow: var(--shadow-sm);
+}
+
+    .eui-widget.sidebar .eui-row {
+        min-height: 52px;
+    }
+
+    .eui-widget.sidebar .panel-title {
+        margin-bottom: 6px;
+    }
+
+/* Collapsed Study Controls helper (No redundancy in this block) */
+.study-controls.is-collapsed .study-grid {
+    display: none;
+}
+
+/* spacing helpers (No redundancy in this block) */
+.section-gradient,
+.section-eui,
+.section-water {
+    margin-bottom: 14px;
+}
+
+/* Gradient section (visual only) (No redundancy in this block) */
+.gradient-card {
+    position: relative;
+    border-radius: 12px;
+    overflow: hidden;
+    padding: 16px 18px;
+    background: #bef5e9;
+    color: black;
+    box-shadow: var(--shadow-sm);
+    border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* Impact label layout inside the gradient card (No redundancy in this block) */
+.impact-card {
+    display: flex;
+    flex-direction: column;
+    gap: 10px; /* matches general spacing scale */
+}
+
+/* header text uses the same styles as other gradient headers (No redundancy in this block) */
+.impact-header {
+    margin-bottom: 2px;
+}
+
+/* Redundant styles removed: .gradient-title and .gradient-subtitle redefined later. */
+
+/* main row: image + details (No redundancy in this block) */
+.impact-body {
+    display: flex;
+    gap: 12px;
+    align-items: center;
+}
+
+.impact-image-wrap {
+    flex-shrink: 0;
+}
+
+.impact-image {
+    display: block;
+    height: 68px; /* visually balanced with sidebar fonts */
+    width: auto;
+}
+
+/* copy the card-ish text scale used in other side panels (No redundancy in this block) */
+.impact-details {
+    flex: 1;
+    font-size: 0.85rem;
+    line-height: 1.3;
+}
+
+/* New: big, attention-grabbing score row (No redundancy in this block) */
+.impact-grade-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-bottom: 4px;
+}
+
+.impact-grade-label {
+    font-size: 0.8rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    font-weight: 700;
+    opacity: 0.85;
+}
+
+/* The badge: larger, bolder, strong contrast (No redundancy in this block) */
+.impact-grade-badge {
+    font-size: 1.35rem;
+    font-weight: 800;
+    padding: 2px 12px;
+    border-radius: 999px;
+    background: #0f766e; /* teal-ish for the default look */
+    color: #ffffff;
+    box-shadow: 0 0 0 1px rgba(15, 118, 110, 0.35), 0 4px 10px rgba(15, 23, 42, 0.22);
+}
+
+/* Optional: tweak per-grade color to reinforce urgency (No redundancy in this block) */
+.impact-grade-A {
+    background: #16a34a; /* green */
+}
+
+.impact-grade-B {
+    background: #22c55e;
+}
+
+.impact-grade-C {
+    background: #eab308; /* yellow */
+}
+
+.impact-grade-D {
+    background: #f97316; /* orange */
+}
+
+.impact-grade-E {
+    background: #ef4444; /* red */
+}
+
+.impact-grade-text {
+    font-weight: var(--font-weight-strong);
+    margin-bottom: 2px;
+}
+
+.impact-description {
+    opacity: 0.95;
+}
+
+/* small, tabular metrics row (No redundancy in this block) */
+.impact-metrics {
+    margin-top: 4px;
+    opacity: 0.9;
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 10px;
+    font-size: 0.78rem;
+    font-variant-numeric: tabular-nums;
+}
+
+/* helper line at the bottom (No redundancy in this block) */
+.impact-footer {
+    margin-top: 2px;
+    font-size: 0.75rem;
+    opacity: 0.85;
+}
+
+/* Final definitions for gradient titles (retained as they are the last ones) */
+.gradient-title {
+    font-weight: 800;
+    letter-spacing: .2px;
+    font-size: 1rem;
+    margin-bottom: 2px;
+}
+
+.gradient-subtitle {
+    opacity: 0.95;
+    font-size: 0.875rem;
+}
+
+/* EUI already renders its own panel; no extra chrome needed around it (No redundancy in this block) */
+.section-eui .eui-widget.sidebar {
+    margin: 0;
+}
+
+/* typing-indicator (No redundancy in this block) */
+.typing-indicator {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    min-width: 40px;
+}
+
+    /* this is the important part: display:inline-block */
+    .typing-indicator > span {
+        display: inline-block;
+        width: 6px;
+        height: 6px;
+        border-radius: 999px;
+        background: rgba(0, 0, 0, 0.35);
+        animation: typing-bounce 1.2s infinite ease-in-out;
+    }
+
+        .typing-indicator > span:nth-child(2) {
+            animation-delay: 0.15s;
+        }
+
+        .typing-indicator > span:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+/* Thinking dots for deep thinking mode */
+.thinking-dots {
+    display: inline-flex;
+    align-items: center;
+    gap: 3px;
+}
+
+    .thinking-dots span {
+        display: inline-block;
+        width: 5px;
+        height: 5px;
+        border-radius: 999px;
+        background: rgba(0, 0, 0, 0.4);
+        animation: typing-bounce 1.2s infinite ease-in-out;
+    }
+
+        .thinking-dots span:nth-child(2) {
+            animation-delay: 0.15s;
+        }
+
+        .thinking-dots span:nth-child(3) {
+            animation-delay: 0.3s;
+        }
+
+@keyframes typing-bounce {
+    0%, 80%, 100% {
+        transform: translateY(0);
+        opacity: 0.4;
+    }
+
+    40% {
+        transform: translateY(-3px);
+        opacity: 1;
+    }
+}
+
+
+/* Energy Dashboard card (new sidebar UI) */
+/* The final definition for .energy-dashboard-outer and .energy-dashboard-inner is kept. */
+.energy-dashboard-outer {
+    background: #ffffff;
+    border: 1px solid var(--color-border);
+    border-radius: 14px;
+    padding: 16px;
+    max-width: 360px;
+    width: 100%;
+    box-shadow: var(--shadow-sm);
+}
+
+.energy-dashboard-inner {
+    background: #92b2d0;
+    border-radius: 10px;
+    padding: 24px 22px 26px;
+    color: #111111;
+}
+
+    /* Typography inside the dashboard (No redundancy in this block) */
+    .energy-dashboard-inner h1 {
+        margin: 0;
+        font-size: 24px;
+        line-height: 1.2;
+        color: #ffffff;
+    }
+
+    .energy-dashboard-inner .subtitle {
+        margin: 4px 0 24px;
+        font-size: 13px;
+        color: #f5f7fb;
+    }
+
+    /* Shared section layout (No redundancy in this block) */
+    .energy-dashboard-inner .section {
+        margin-bottom: 24px;
+    }
+
+    .energy-dashboard-inner .label {
+        font-weight: 700;
+        margin-bottom: 4px;
+        font-size: 13px;
+        color: #0b1824;
+    }
+
+    .energy-dashboard-inner .value {
+        font-size: 18px;
+        font-weight: 600;
+        color: #0b1824;
+    }
+
+    /* Info block (No redundancy in this block) */
+    .energy-dashboard-inner .info-title {
+        font-weight: 700;
+        margin-bottom: 4px;
+        font-size: 13px;
+        color: #0b1824;
+    }
+
+    .energy-dashboard-inner .info-text {
+        margin: 0;
+        font-size: 13px;
+        line-height: 1.4;
+        color: #0b1824;
+    }
+
+    /* Impact score heading + grade (The final definition is kept) */
+    .energy-dashboard-inner .impact-heading {
+        margin-top: 32px;
+        font-size: 20px;
+        font-weight: 700;
+        color: #ffffff;
+    }
+
+    /* The first .impact-grade was overwritten and is removed.
+       The second one was renamed to .e-impact-grade and is kept. */
+    .energy-dashboard-inner .e-impact-grade {
+        margin-top: 16px;
+        margin-bottom: 24px;
+        font-size: 48px;
+        font-weight: 700;
+        text-align: center;
+    }
+
+    /* Grade-specific text colours (letter only, no background)
+       The first set of .impact-grade-X was overwritten and is removed.
+       The second set of .e-impact-grade-X is kept. */
+    .energy-dashboard-inner .e-impact-grade-A {
+        color: #16a34a; /* green */
+    }
+
+    .energy-dashboard-inner .e-impact-grade-B {
+        color: #22c55e;
+    }
+
+    .energy-dashboard-inner .e-impact-grade-C {
+        color: #eab308; /* yellow */
+    }
+
+    .energy-dashboard-inner .e-impact-grade-D {
+        color: #f97316; /* orange */
+    }
+
+    .energy-dashboard-inner .e-impact-grade-E {
+        color: #ef4444; /* red */
+    }
+
+    /* Note at the bottom (No redundancy in this block) */
+    .energy-dashboard-inner .note {
+        font-size: 12px;
+        line-height: 1.5;
+        margin: 0;
+        color: #0b1824;
+    }
+
+        .energy-dashboard-inner .note strong {
+            font-weight: 700;
+        }
+
+    /* Optional small metrics row at bottom (prompts, etc.) (No redundancy in this block) */
+    .energy-dashboard-inner .session-metrics {
+        margin-top: 10px;
+        font-size: 12px;
+        line-height: 1.4;
+        color: #0b1824;
+        opacity: 0.9;
+    }
+
+
+/* root-ish base button fix */
+button,
+.btn {
+    white-space: normal;
+    overflow-wrap: break-word;
+    word-break: break-word;
+}
+
+/* timer-specific layout sanity */
+.timer-buttons {
+    display: flex;
+    gap: 0.5rem;
+}
+
+    .timer-buttons button {
+        flex: 1 1 0;
+        min-width: 0;
+        text-align: center;
+    }

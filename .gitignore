@@ -1,0 +1,158 @@
+# ================================
+# Root .gitignore for AI4ALL Energy Chat Dashboard
+# ================================
+
+# ----------------
+# Claude Code / AI Tools
+# ----------------
+.claude/
+.claude-*
+*.claude
+
+# ----------------
+# Python
+# ----------------
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+*.egg-info/
+.installed.cfg
+*.egg
+*.manifest
+*.spec
+pip-log.txt
+pip-delete-this-directory.txt
+
+# Virtual Environments
+.env/
+.venv/
+env/
+venv/
+ENV/
+env.bak/
+venv.bak/
+backend/.venv/
+
+# Testing
+htmlcov/
+.tox/
+.nox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+*.py,cover
+.hypothesis/
+.pytest_cache/
+
+# Type checking
+.mypy_cache/
+.dmypy.json
+dmypy.json
+.pyre/
+
+# Cython
+cython_debug/
+
+# Jupyter
+.ipynb_checkpoints/
+
+# ----------------
+# Node.js / Frontend
+# ----------------
+node_modules/
+dist/
+dist-ssr/
+*.local
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+.npm/
+.yarn/
+
+# ----------------
+# IDE / Editors
+# ----------------
+.vscode/
+!.vscode/extensions.json
+!.vscode/settings.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+.vs/
+*.sublime-workspace
+*.sublime-project
+
+# ----------------
+# OS Generated
+# ----------------
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+Desktop.ini
+
+# ----------------
+# Application Data (user-generated, don't commit)
+# ----------------
+# Chat records and saved sessions
+backend/chats/
+backend/images/
+backend/reports/
+chats/
+images/
+reports/
+
+# ----------------
+# Environment & Secrets
+# ----------------
+*.env
+.env
+.env.local
+.env.*.local
+*.local.json
+secrets.json
+credentials.json
+
+# ----------------
+# Logs
+# ----------------
+*.log
+logs/
+
+# ----------------
+# Database
+# ----------------
+*.sqlite3
+*.db
+
+# ----------------
+# Misc
+# ----------------
+*.bak
+*.tmp
+*.temp
+*~

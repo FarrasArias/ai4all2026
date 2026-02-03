@@ -1,0 +1,36 @@
+:root {
+    /* Layout sizes */
+    --sidebar-w: 360px;
+    --gap: 16px;
+    --radius: 14px;
+    --chat-input-h: 50px;
+    --card-padding: 16px;
+    /* Typography */
+    --font-family: ui-sans-serif, system-ui, -apple-system, Segoe UI, Roboto, "Helvetica Neue", Arial, "Noto Sans", "Liberation Sans", "Apple Color Emoji", "Segoe UI Emoji";
+    --font-size: 15px;
+    --font-size-lg: 24px;
+    --font-weight-strong: 700;
+    /* Colors (light) – aligned with the new Energy Dashboard design */
+    --color-bg: #eef3f7; /* page background */
+    --color-panel: #ffffff; /* base card background */
+    --color-sidebar-bg: transparent;
+    --color-border: #d0d7e2; /* soft steel border */
+    --color-text: #111111; /* main text */
+    --color-text-dim: #243447; /* slightly dimmed text */
+    --color-accent: #1b6e28; /* green accent for buttons/focus */
+    /* Meter gradient stops (kept) */
+    --meter-green: #2ecc71;
+    --meter-yellow: #f1c40f;
+    --meter-red: #e74c3c;
+    /* Chat bubbles – light blue/grey to fit new palette */
+    --bubble-user: #e2ecf4;
+    --bubble-bot: #ffffff;
+    /* Buttons / inputs */
+    --input-bg: #ffffff;
+    --input-text: var(--color-text);
+    --button-bg: #1b6e28;
+    --button-text: #ffffff;
+    /* Shadows */
+    --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.16);
+    --shadow-md: 0 10px 30px rgba(15, 23, 42, 0.25);
+}
