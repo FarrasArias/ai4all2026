@@ -321,10 +321,13 @@ def chat(
             print(f"Error loading document {path}: {e}")
 
     def _gen() -> AsyncGenerator[bytes, None]:
-        global _latest_chat_model
+        global _latest_chat_model, _latest_prompt_Wh
         _ensure_power_thread()
         _llm_running_flag["mode"] = "Chat"
         _latest_chat_model = model
+
+        # Track inference start time
+        start_time = time.time()
 
         try:
             # Stream chunks from the shared chat engine (with memory + docs)
@@ -335,8 +338,17 @@ def chat(
             yield f"data: {json.dumps({'error': str(e)})}\n\n".encode("utf-8")
         finally:
             _llm_running_flag["mode"] = "None"
-            # Tell the client we're done
-            yield b'data: {"done": true}\n\n'
+            # Calculate inference time
+            inference_time_ms = int((time.time() - start_time) * 1000)
+            # Give power thread a moment to finalize energy calculation
+            time.sleep(0.3)
+            # Tell the client we're done, include metrics
+            done_payload = {
+                "done": True,
+                "inference_time_ms": inference_time_ms,
+                "energy_wh": _latest_prompt_Wh,
+            }
+            yield f"data: {json.dumps(done_payload)}\n\n".encode("utf-8")
 
     return StreamingResponse(_gen(), media_type="text/event-stream")
 

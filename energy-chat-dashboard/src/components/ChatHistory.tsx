@@ -1,12 +1,30 @@
 import React, { useEffect, useRef, useState } from "react";
 import ReactMarkdown from "react-markdown";
+import type { InferenceMetrics } from "../api";
 
-type Msg = { role: "user" | "bot"; text: string };
+type Msg = { role: "user" | "bot"; text: string; metrics?: InferenceMetrics };
 type Props = {
   messages: Msg[];
   isStreaming?: boolean;
   thinkingMode?: "fast" | "deep";
 };
+
+// Format milliseconds to human-readable string
+function formatTime(ms: number): string {
+  if (ms < 1000) return `${ms}ms`;
+  const seconds = ms / 1000;
+  if (seconds < 60) return `${seconds.toFixed(1)}s`;
+  const minutes = Math.floor(seconds / 60);
+  const remainingSeconds = (seconds % 60).toFixed(0);
+  return `${minutes}m ${remainingSeconds}s`;
+}
+
+// Format energy to human-readable string
+function formatEnergy(wh: number): string {
+  if (wh < 0.001) return `${(wh * 1000000).toFixed(2)} µWh`;
+  if (wh < 1) return `${(wh * 1000).toFixed(2)} mWh`;
+  return `${wh.toFixed(4)} Wh`;
+}
 
 // Rotating thinking messages for deep thinking mode
 const THINKING_MESSAGES = [
@@ -79,6 +97,13 @@ export default function ChatHistory({ messages, isStreaming = false, thinkingMod
             >
               {m.text}
             </ReactMarkdown>
+            {/* Display inference metrics for bot messages */}
+            {m.role === "bot" && m.metrics && (
+              <div className="inference-metrics">
+                <span title="Inference time">⏱ {formatTime(m.metrics.inference_time_ms)}</span>
+                <span title="Energy consumption">⚡ {formatEnergy(m.metrics.energy_wh)}</span>
+              </div>
+            )}
           </div>
         </div>
       ))}

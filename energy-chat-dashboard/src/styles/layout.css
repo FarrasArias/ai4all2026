@@ -940,3 +940,21 @@ button,
         min-width: 0;
         text-align: center;
     }
+
+/* Inference metrics display under bot messages */
+.inference-metrics {
+    display: flex;
+    gap: 12px;
+    margin-top: 8px;
+    padding-top: 6px;
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+    font-size: 11px;
+    color: var(--color-text-dim, #666);
+    opacity: 0.85;
+}
+
+    .inference-metrics span {
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+    }

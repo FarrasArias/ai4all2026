@@ -1,9 +1,9 @@
 import React, { useEffect, useState, useRef } from "react";
 import ChatHistory from "./ChatHistory";
 import ChatInput from "./ChatInput";
-import { streamChat, listChats, saveChat, loadChat, getPinnedChats, togglePinnedChat, searchChats, type SearchResult } from "../api";
+import { streamChat, listChats, saveChat, loadChat, getPinnedChats, togglePinnedChat, searchChats, type SearchResult, type InferenceMetrics } from "../api";
 
-type Msg = { role: "user" | "bot"; text: string };
+type Msg = { role: "user" | "bot"; text: string; metrics?: InferenceMetrics };
 
 type Props = {
     model?: string; // default chat model (fallback)
@@ -95,7 +95,7 @@ export default function ChatPane({
 
         let acc = "";
         try {
-            await streamChat(
+            const metrics = await streamChat(
                 { prompt: text, model: activeModel, files, thinkingMode },
                 (delta: string) => {
                     acc += delta;
@@ -106,6 +106,18 @@ export default function ChatPane({
                     });
                 },
             );
+            // Update the last bot message with metrics once streaming completes
+            if (metrics) {
+                setMessages((m) => {
+                    const lastIdx = m.length - 1;
+                    if (lastIdx >= 0 && m[lastIdx].role === "bot") {
+                        const updated = [...m];
+                        updated[lastIdx] = { ...updated[lastIdx], metrics };
+                        return updated;
+                    }
+                    return m;
+                });
+            }
         } catch (err) {
             console.error(err);
             setMessages((m) => [

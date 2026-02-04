@@ -47,6 +47,11 @@ export async function deleteModels(models: string[]) {
 
 export type ThinkingMode = "fast" | "deep";
 
+export type InferenceMetrics = {
+  inference_time_ms: number;
+  energy_wh: number;
+};
+
 export function streamChat(
     {
         prompt,
@@ -55,7 +60,8 @@ export function streamChat(
         thinkingMode,
     }: { prompt: string; model: string; files?: File[]; thinkingMode?: ThinkingMode },
     onDelta: (text: string) => void,
-) {
+    onComplete?: (metrics: InferenceMetrics) => void,
+): Promise<InferenceMetrics | undefined> {
     const body = new FormData();
     body.append("prompt", prompt);
     body.append("model", model);
@@ -65,6 +71,7 @@ export function streamChat(
     return fetch(`${API_BASE}/api/chat`, { method: "POST", body }).then(async (res) => {
     const reader = res.body!.getReader();
     const decoder = new TextDecoder();
+    let metrics: InferenceMetrics | undefined;
     while (true) {
       const { value, done } = await reader.read();
       if (done) break;
@@ -74,8 +81,16 @@ export function streamChat(
         const payload = JSON.parse(line.slice(5).trim());
         if (payload.error) throw new Error(payload.error);
         if (payload.delta) onDelta(payload.delta);
+        if (payload.done && payload.inference_time_ms !== undefined) {
+          metrics = {
+            inference_time_ms: payload.inference_time_ms,
+            energy_wh: payload.energy_wh ?? 0,
+          };
+          onComplete?.(metrics);
+        }
       }
     }
+    return metrics;
   });
 }
 
