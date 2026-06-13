@@ -46,10 +46,11 @@ export async function loadModel(model: string): Promise<{ ok: boolean; error?: s
 }
 
 export async function deleteModels(models: string[]) {
-  const r = await fetch(
-    `${API_BASE}/api/models?` + new URLSearchParams({ models: models as any }),
-    { method: "DELETE" },
-  );
+  const r = await fetch(`${API_BASE}/api/models`, {
+    method: "DELETE",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify(models),
+  });
   return r.json();
 }
 

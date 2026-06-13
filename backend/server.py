@@ -1,5 +1,8 @@
 # server.py
 
+import os
+import json
+
 from image_v1 import DEFAULT_MODEL as IMAGE_DEFAULT_MODEL
 from vibe_coding import DEFAULT_MODEL as VIBE_DEFAULT_MODEL, VibeCodingChat
 from web_chat import DEFAULT_MODEL as WEB_DEFAULT_MODEL, WebChatSession
@@ -32,19 +35,15 @@ def get_model_config():
 
 # Legacy constant for backwards compatibility
 CHAT_DEFAULT_MODEL = "qwen3:1.7b"  # Overridden by config if available
-
-import os
-import io
-import json
 import time
 import shutil
 import threading
 import subprocess
 import signal
 from datetime import date
-from typing import List, Optional, AsyncGenerator
+from typing import Dict, List, Optional
 
-import fitz  # PyMuPDF (kept for compatibility. TODO: Remove?)
+import base64
 import ollama
 import requests
 from fastapi import FastAPI, UploadFile, File, Form
@@ -285,8 +284,6 @@ def create_model(name: str = Form(...), modelfile: str = Form(...)):
         return JSONResponse({"ok": False, "error": str(e)}, status_code=500)
 
 
-from typing import Dict
-
 @app.get("/api/modes/default-models")
 def get_mode_defaults():
     """
@@ -360,7 +357,7 @@ def chat(
             # Non-fatal: we log, but still attempt to answer the prompt
             print(f"Error loading document {path}: {e}")
 
-    def _gen() -> AsyncGenerator[bytes, None]:
+    def _gen():
         global _latest_chat_model, _latest_prompt_Wh, _session_total_Wh
         _ensure_power_thread()
         _llm_running_flag["mode"] = "Chat"
@@ -681,9 +678,6 @@ def analyze_image(
     path = os.path.join(IMG_DIR, "_tmp_image.png")
     with open(path, "wb") as out:
         shutil.copyfileobj(image.file, out)
-
-    # Base64 encode for Ollama multimodal endpoint
-    import base64
 
     with open(path, "rb") as f:
         b64 = base64.b64encode(f.read()).decode()

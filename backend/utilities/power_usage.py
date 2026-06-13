@@ -20,8 +20,7 @@ def get_default_power_usages():
 
 def get_cpu_power_usage():
     try:
-        # Approximate by calculating power per logical CPU
-        load = psutil.cpu_percent(interval=1)
+        load = psutil.cpu_percent(interval=None)
         return load
     except Exception as e:
         return None
